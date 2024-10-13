@@ -1,8 +1,8 @@
 import { useReadContract } from 'wagmi';
-import { contractAbi } from '@/const/contract.const.ts';
+import { MULTISIG_WALLET_ABI } from '@/const/contract.const.ts';
 import { useStore } from '@/const/local-storage.const.ts';
 
-export const useGetTransactionCount = () => {
+export const useGetTransactionCountHook = () => {
   const { activeContract } = useStore();
 
   const {
@@ -10,7 +10,7 @@ export const useGetTransactionCount = () => {
     queryKey: transactionCountQueryKey,
     refetch: refetchTransactionCount
   } = useReadContract({
-    abi: contractAbi,
+    abi: MULTISIG_WALLET_ABI,
     address: activeContract?.contractAddress,
     functionName: 'getTransactionCount',
   });

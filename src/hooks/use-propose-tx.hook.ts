@@ -1,7 +1,7 @@
 import { useWriteContract } from 'wagmi';
 import { Address, Hex } from 'viem';
 import { toast } from 'sonner';
-import { contractAbi } from '@/const/contract.const';
+import { MULTISIG_WALLET_ABI } from '@/const/contract.const';
 import { useStore } from '@/const/local-storage.const';
 
 export const useProposeTx = () => {
@@ -36,7 +36,7 @@ export const useProposeTx = () => {
     }
 
     return proposalWriteContract({
-      abi: contractAbi,
+      abi: MULTISIG_WALLET_ABI,
       address: activeContract.contractAddress,
       functionName: 'submitTransaction',
       args: [tokenAddress, to, value, data]

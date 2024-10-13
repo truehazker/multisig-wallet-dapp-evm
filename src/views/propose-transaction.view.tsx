@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input.tsx';
 import { Button } from '@/components/ui/button.tsx';
 import { useProposeTx } from '@/hooks/use-propose-tx.hook.ts';
 import { Address, isAddress, zeroAddress } from 'viem';
+import { useGetTokenInfo } from '@/hooks/use-get-token-info.hook.ts';
 
 export const ProposeTransaction = () => {
   const { proposalWriteContract, proposalIsPending } = useProposeTx();
@@ -17,6 +18,7 @@ export const ProposeTransaction = () => {
     to: '',
     value: ''
   });
+  const { tokenDecimals } = useGetTokenInfo(formData.tokenAddress as Address);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -54,7 +56,7 @@ export const ProposeTransaction = () => {
     proposalWriteContract({
       tokenAddress: formData.tokenAddress as Address,
       to: formData.to as Address,
-      value: BigInt(formData.value),
+      value: BigInt(formData.value) * 10n ** BigInt(tokenDecimals),
       data: '0x'
     });
     // Reset form after successful submission

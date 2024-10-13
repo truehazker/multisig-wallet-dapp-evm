@@ -1,4 +1,6 @@
-import { useGetTransactionCount } from '@/hooks/use-get-transaction.count.ts';
+import {
+  useGetTransactionCountHook
+} from '@/hooks/use-get-transaction-count.hook.ts';
 import {
   ITransaction,
   useGetTransaction
@@ -10,7 +12,12 @@ import { queryClient } from '@/main.tsx';
 import { useConfirmTx } from '@/hooks/use-confirm-tx.hook.ts';
 import { Button } from '@/components/ui/button.tsx';
 import { useGetOwners } from '@/hooks/use-get-owners.hook.ts';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger
+} from '@/components/ui/dialog';
 import { Address } from 'viem';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
@@ -21,13 +28,14 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table';
+import { useGetTokenInfo } from '@/hooks/use-get-token-info.hook.ts';
 
 const TransactionStatus = ({ executed, isConfirmed }: {
   executed: boolean,
   isConfirmed: boolean
 }) => {
-  let outerColor = executed ? 'bg-green-400' : isConfirmed ? 'bg-green-400' : 'bg-blue-400';
-  let innerColor = executed ? 'bg-green-500' : isConfirmed ? 'bg-green-500' : 'bg-blue-500';
+  const outerColor = executed ? 'bg-green-400' : isConfirmed ? 'bg-green-400' : 'bg-blue-400';
+  const innerColor = executed ? 'bg-green-500' : isConfirmed ? 'bg-green-500' : 'bg-blue-500';
 
   return (
     <span className="relative flex h-3 w-3 mr-2">
@@ -45,12 +53,16 @@ const TransactionDetails = ({
                               transaction,
                               isConfirmed,
                               owners,
-                              handleConfirmTx
+                              handleConfirmTx,
+                              symbol,
+                              decimals
                             }: {
   transaction: ITransaction,
   isConfirmed: boolean,
   owners: readonly Address[],
   handleConfirmTx: () => void
+  symbol: string,
+  decimals: number
 }) => (
   <div className="flex flex-col gap-4">
     <table className="w-full border-collapse">
@@ -65,7 +77,7 @@ const TransactionDetails = ({
       </tr>
       <tr>
         <td className="font-semibold pr-4 py-2">Value:</td>
-        <td>{transaction.value.toString()} ETH</td>
+        <td>{(transaction.value / BigInt(10 ** decimals)).toString()} {symbol}</td>
       </tr>
       <tr>
         <td className="font-semibold pr-4 py-2">Executed:</td>
@@ -94,10 +106,24 @@ const TransactionDetails = ({
 
 export const Transaction = ({ id }: { id: number }) => {
   const { address } = useAccount();
-  const { transaction } = useGetTransaction(BigInt(id));
-  const { isConfirmed } = useIsConfirmed(BigInt(id), address || '0x');
+  const { transaction, getTransactionQueryKey } = useGetTransaction(BigInt(id));
+  const { isConfirmed, isConfirmedQueryKey } = useIsConfirmed(BigInt(id), address || '0x');
   const { confirmTxWriteContract } = useConfirmTx();
   const { owners } = useGetOwners();
+  const { data: blockNumber } = useBlockNumber({ watch: true });
+  const {
+    tokenSymbol,
+    tokenDecimals
+  } = useGetTokenInfo(transaction.tokenAddress);
+
+  useEffect(() => {
+    if (blockNumber) {
+      queryClient.invalidateQueries({ queryKey: getTransactionQueryKey });
+      queryClient.invalidateQueries({ queryKey: isConfirmedQueryKey });
+    }
+  }, [blockNumber, queryClient]);
+
+  const convertedValue = transaction.value / BigInt(10 ** tokenDecimals);
 
   const handleConfirmTx = () => {
     confirmTxWriteContract({ txId: id });
@@ -114,7 +140,9 @@ export const Transaction = ({ id }: { id: number }) => {
             />
           </TableCell>
           <TableCell>{id}</TableCell>
-          <TableCell>{transaction.value.toString()} ETH</TableCell>
+          <TableCell>
+            {convertedValue.toString()} {tokenSymbol}
+          </TableCell>
           <TableCell>
             {transaction.confirmations.toString()}
             <span className="text-white/50"> / {owners.length}</span>
@@ -122,12 +150,14 @@ export const Transaction = ({ id }: { id: number }) => {
         </TableRow>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[720px]">
-        <h2 className="text-xl font-bold mb-4">Transaction Details</h2>
+        <DialogTitle>Transaction Details</DialogTitle>
         <TransactionDetails
           transaction={transaction}
           isConfirmed={isConfirmed}
           owners={owners}
           handleConfirmTx={handleConfirmTx}
+          symbol={tokenSymbol}
+          decimals={tokenDecimals}
         />
       </DialogContent>
     </Dialog>
@@ -138,7 +168,7 @@ export const ContractTransactionsView = () => {
   const {
     transactionCountNumber,
     transactionCountQueryKey
-  } = useGetTransactionCount();
+  } = useGetTransactionCountHook();
   const { data: blockNumber } = useBlockNumber({ watch: true });
 
   useEffect(() => {

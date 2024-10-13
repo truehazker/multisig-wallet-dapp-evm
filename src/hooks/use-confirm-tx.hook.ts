@@ -1,6 +1,6 @@
 import { useWriteContract } from 'wagmi';
 import { toast } from 'sonner';
-import { contractAbi } from '@/const/contract.const';
+import { MULTISIG_WALLET_ABI } from '@/const/contract.const';
 import { useStore } from '@/const/local-storage.const';
 
 export const useConfirmTx = () => {
@@ -32,7 +32,7 @@ export const useConfirmTx = () => {
     }
 
     return confirmTxWriteContract({
-      abi: contractAbi,
+      abi: MULTISIG_WALLET_ABI,
       address: activeContract.contractAddress,
       functionName: 'confirmTransaction',
       args: [BigInt(txId)]

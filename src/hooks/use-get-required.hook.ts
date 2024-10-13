@@ -1,5 +1,5 @@
 import { useReadContract } from 'wagmi';
-import { contractAbi } from '@/const/contract.const.ts';
+import { MULTISIG_WALLET_ABI } from '@/const/contract.const.ts';
 import { useStore } from '@/const/local-storage.const.ts';
 
 export const useGetRequired = () => {
@@ -9,7 +9,7 @@ export const useGetRequired = () => {
     data: required = BigInt(0),
     queryKey: getRequiredQueryKey
   } = useReadContract({
-    abi: contractAbi,
+    abi: MULTISIG_WALLET_ABI,
     address: activeContract?.contractAddress,
     functionName: 'required'
   });

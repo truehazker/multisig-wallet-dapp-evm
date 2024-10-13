@@ -1,5 +1,5 @@
 import { useReadContract } from 'wagmi';
-import { contractAbi } from '@/const/contract.const.ts';
+import { MULTISIG_WALLET_ABI } from '@/const/contract.const.ts';
 import { Address } from 'viem';
 import { useStore } from '@/const/local-storage.const.ts';
 
@@ -19,7 +19,7 @@ export const useGetTransaction = (txId: bigint) => {
     data: transaction = ['0x', '0x', BigInt(0), false, BigInt(0), '0x'],
     queryKey: getTransactionQueryKey
   } = useReadContract({
-    abi: contractAbi,
+    abi: MULTISIG_WALLET_ABI,
     address: activeContract?.contractAddress,
     functionName: 'getTransaction',
     args: [txId]
