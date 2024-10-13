@@ -1,56 +1,53 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { Section } from '@/components/section.component.tsx';
 import { Container } from '@/components/container.component.tsx';
-import { Button } from '@/components/ui/button.tsx';
-import { Input } from '@/components/ui/input.tsx';
-import { Slider } from '@/components/ui/slider.tsx';
-import { Address, Hash, isAddress } from 'viem';
-import { X, Plus, LoaderCircle } from 'lucide-react';
-import { useAccount, useDeployContract } from 'wagmi';
-import { ConnectKitButton } from 'connectkit';
-import { contractAbi, contractBytecode } from '@/const/contract.const.ts';
-import { waitForTransactionReceipt } from 'viem/actions';
-import { config } from '@/const/wagmi-config.const.ts';
+import { useAccount } from 'wagmi';
 import { LocalStorage } from '@/const/local-storage.const.ts';
+import { Address, isAddress } from 'viem';
+import {
+  useDeployMultisigWallet
+} from '@/hooks/use-deploy-multisig-wallet.hook.ts';
+import {
+  ConnectionNotice
+} from '@/components/connection-notice.component.tsx';
+import { OwnersInput } from '@/components/owners-input.component.tsx';
+import { ThresholdInput } from '@/components/threshold-input.component.tsx';
+import { DeploymentButton } from '@/components/deployment-button.component.tsx';
+import { toast } from 'sonner';
 
 export const DeployContractView = () => {
-  const [deploymentLoading, setDeploymentLoading] = useState(false);
-  const { deployContract, data: deploymentTx } = useDeployContract();
   const { isConnected, address } = useAccount();
 
-  const [owners, setOwners] = useState<string[]>([]);
+  const [owners, setOwners] = useState<string[]>(['']);
   const [threshold, setThreshold] = useState<number>(1);
 
-  useEffect(() => {
-    const waitForDeployment = async () => {
-      const data = await waitForTransactionReceipt(config.getClient(), { hash: deploymentTx as Hash });
-      if (!data.contractAddress) {
-        console.error('Contract deployment failed:', data);
-        return;
-      } else if (data.contractAddress) {
-        console.log('Contract deployed:', data.contractAddress);
-        LocalStorage.setActiveContract(data.contractAddress);
-      } else {
-        console.error('Invalid transaction data:', data);
+  // Custom hook for deploying contract
+  const {
+    deployContract,
+    isLoading: deploymentLoading,
+    error: deploymentError
+  } =
+    useDeployMultisigWallet({
+      onSuccess: ({ contractAddress }) => {
+        console.log('Contract deployed:', contractAddress);
+        LocalStorage.setActiveContract(contractAddress);
+        toast.success('Contract deployed successfully');
+      },
+      onError: (error) => {
+        console.error('Deployment error:', error);
       }
-    };
+    });
 
-    if (deploymentTx) {
-      waitForDeployment()
-        .catch((e) => console.error('Error waiting for deployment:', e))
-        .finally(() => setDeploymentLoading(false));
-    }
-  }, [deploymentTx]);
-
+  // Update owners when account changes
   useEffect(() => {
     if (isConnected && address) {
-      const [_, ...rest] = owners;
-      setOwners([address, ...rest]);
+      setOwners((prev) => [address, ...prev.filter((addr) => addr !== address)]);
     } else {
-      setOwners((prev) => (prev.length > 0 ? prev.slice(1) : prev));
+      setOwners((prev) => prev.filter((_, index) => index !== 0));
     }
   }, [isConnected, address]);
 
+  // Ensure threshold is valid
   useEffect(() => {
     setThreshold((prev) => Math.min(Math.max(1, prev), owners.length));
   }, [owners.length]);
@@ -60,10 +57,7 @@ export const DeployContractView = () => {
   }, []);
 
   const removeOwner = useCallback((index: number) => {
-    setOwners((prev) => {
-      const newOwners = prev.filter((_, i) => i !== index);
-      return newOwners.length < 2 ? prev : newOwners;
-    });
+    setOwners((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
   const updateOwner = useCallback((index: number, value: string) => {
@@ -71,29 +65,26 @@ export const DeployContractView = () => {
   }, []);
 
   const validateOwners = useCallback(() => {
-    const validAddresses = owners.filter((address) => isAddress(address));
+    const validAddresses = owners.filter((addr) => isAddress(addr));
     const uniqueAddresses = new Set(validAddresses);
     return validAddresses.length === owners.length && uniqueAddresses.size === owners.length;
   }, [owners]);
 
-  const handleDeploy = useCallback(() => {
+  const handleDeploy = useCallback(async () => {
     if (isConnected && validateOwners() && threshold > 0 && threshold <= owners.length) {
-      console.log('Deploy contract with:', owners, threshold);
-
-      deployContract({
-        abi: contractAbi,
-        bytecode: contractBytecode,
-        args: [owners as Address[], BigInt(threshold)]
-      });
-
-      setDeploymentLoading(true);
+      await deployContract(owners as Address[], BigInt(threshold));
     } else {
       console.error('Invalid input or not connected');
     }
-  }, [isConnected, owners, threshold, validateOwners]);
+  }, [isConnected, owners, threshold, validateOwners, deployContract]);
 
   const isValid = useMemo(
-    () => isConnected && validateOwners() && threshold > 0 && threshold <= owners.length && owners.length >= 2,
+    () =>
+      isConnected &&
+      validateOwners() &&
+      threshold > 0 &&
+      threshold <= owners.length &&
+      owners.length >= 2,
     [isConnected, owners, threshold, validateOwners]
   );
 
@@ -106,69 +97,33 @@ export const DeployContractView = () => {
           <div className="flex flex-col gap-4 border rounded p-6">
             <h2 className="text-xl font-bold">Deploy new MultisigWallet</h2>
             {!isConnected ? (
-              <div className="flex flex-col items-center gap-4">
-                <p className="text-red-500">Please connect your wallet to deploy
-                  a contract.</p>
-                <ConnectKitButton/>
-              </div>
+              <ConnectionNotice/>
             ) : (
               <>
-                {owners.map((owner, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <Input
-                      placeholder={`Owner ${index + 1}`}
-                      value={owner}
-                      onChange={(e) => updateOwner(index, e.target.value)}
-                      className={!isAddress(owner) && owner !== '' ? 'border-red-500' : ''}
-                      disabled={index === 0}
-                    />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeOwner(index)}
-                      disabled={owners.length <= 2 || index === 0}
-                    >
-                      <X className="h-4 w-4"/>
-                    </Button>
-                  </div>
-                ))}
-                <Button variant="outline" className="w-full"
-                        onClick={addOwner}>
-                  <Plus className="h-4 w-4 mr-2"/> Add Owner
-                </Button>
-                <div className="flex flex-col gap-2">
-                  <label htmlFor="threshold" className="text-sm font-medium">
-                    Threshold: {threshold} / {owners.length}
-                  </label>
-                  <Slider
-                    id="threshold"
-                    min={1}
-                    max={owners.length}
-                    step={1}
-                    value={[threshold]}
-                    onValueChange={(value) => setThreshold(value[0])}
-                    disabled={!hasMinimumOwners}
-                  />
-                </div>
-                <Button
-                  className="w-fit gap-2"
-                  onClick={handleDeploy}
-                  disabled={!isValid || deploymentLoading}
-                >
-                  {deploymentLoading ? (
-                    <>Deploying <LoaderCircle className="h-5 w-5 animate-spin"/></>
-                  ) : (
-                    <>Deploy</>
-                  )}
-                </Button>
+                <OwnersInput
+                  owners={owners}
+                  updateOwner={updateOwner}
+                  removeOwner={removeOwner}
+                  addOwner={addOwner}
+                />
+                <ThresholdInput
+                  threshold={threshold}
+                  setThreshold={setThreshold}
+                  ownersCount={owners.length}
+                  hasMinimumOwners={hasMinimumOwners}
+                />
+                <DeploymentButton
+                  isValid={isValid}
+                  isLoading={deploymentLoading}
+                  handleDeploy={handleDeploy}
+                />
                 {!hasMinimumOwners && (
                   <p className="text-red-500 text-sm">At least two owners are
                     required.</p>
                 )}
-                {deploymentTx && (
-                  <p className="text-green-500 text-sm">
-                    Contract deployed: {deploymentTx}
-                  </p>
+                {deploymentError && (
+                  <p className="text-red-500 text-sm">Deployment
+                    error: {deploymentError.message}</p>
                 )}
               </>
             )}
