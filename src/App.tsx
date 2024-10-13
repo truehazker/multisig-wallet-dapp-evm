@@ -1,12 +1,9 @@
-import { ConnectKitButton } from 'connectkit';
+import { DeployContractView } from '@/views/deploy-contract.view.tsx';
 
 function App() {
   return (
     <>
-      <h1 className="text-4xl text-center mt-20">
-        Welcome to React 18
-      </h1>
-      <ConnectKitButton/>
+      <DeployContractView/>
     </>
   );
 }
