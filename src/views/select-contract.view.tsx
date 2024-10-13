@@ -72,7 +72,7 @@ const ContractDetailsModal = ({ contract, isOpen, onClose }: {
                 </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell>Threshold</TableCell>
+                <TableCell>Confirmations</TableCell>
                 <TableCell>{contract.threshold.toString()}</TableCell>
               </TableRow>
             </TableBody>
@@ -146,7 +146,7 @@ export const SelectContractView = () => {
             <TableRow>
               <TableHead>Contract Address</TableHead>
               <TableHead>Owners</TableHead>
-              <TableHead>Threshold</TableHead>
+              <TableHead>Confirmations</TableHead>
               <TableHead>Action</TableHead>
             </TableRow>
           </TableHeader>

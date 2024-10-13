@@ -1,21 +1,23 @@
 import { useReadContract } from 'wagmi';
 import { contractAbi } from '@/const/contract.const.ts';
+import { Address } from 'viem';
 import { useStore } from '@/const/local-storage.const.ts';
 
-export const useGetTransactionCountHook = () => {
+export const useIsConfirmed = (txId: bigint, owner: Address) => {
   const { activeContract } = useStore();
 
   const {
-    data: transactionCount = BigInt(0),
-    queryKey: transactionCountQueryKey
+    data: isConfirmed = false,
+    queryKey: isConfirmedQueryKey
   } = useReadContract({
     abi: contractAbi,
     address: activeContract?.contractAddress,
-    functionName: 'getTransactionCount'
+    functionName: 'isConfirmed',
+    args: [txId, owner]
   });
 
   return {
-    transactionCount,
-    transactionCountQueryKey
+    isConfirmed,
+    isConfirmedQueryKey
   };
 };
