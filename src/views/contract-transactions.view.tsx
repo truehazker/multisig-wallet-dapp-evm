@@ -18,7 +18,7 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog';
-import { Address, zeroAddress } from 'viem';
+import { Address, formatUnits, zeroAddress } from 'viem';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Table,
@@ -41,7 +41,7 @@ const TransactionStatus = ({ executed, isConfirmed }: {
   return (
     <span className="relative flex items-center">
       {executed ? (
-        <CheckCircle2 className="h-4 w-4 text-green-500 mr-2" />
+        <CheckCircle2 className="h-4 w-4 text-green-500 mr-2"/>
       ) : (
         <span className="relative flex h-3 w-3 mr-2">
           <span
@@ -84,7 +84,7 @@ const TransactionDetails = ({
       </tr>
       <tr>
         <td className="font-semibold pr-4 py-2">Value:</td>
-        <td>{(transaction.value / BigInt(10 ** decimals)).toString()} {symbol}</td>
+        <td>{formatUnits(transaction.value, decimals)} {symbol}</td>
       </tr>
       <tr>
         <td className="font-semibold pr-4 py-2">Executed:</td>
@@ -106,7 +106,8 @@ const TransactionDetails = ({
       </tbody>
     </table>
     {transaction.executed ? (
-      <Button disabled className="bg-green-500 hover:bg-green-500 cursor-not-allowed">
+      <Button disabled
+              className="bg-green-500 hover:bg-green-500 cursor-not-allowed">
         Executed
       </Button>
     ) : (
@@ -120,7 +121,10 @@ const TransactionDetails = ({
 export const Transaction = ({ id }: { id: number }) => {
   const { address } = useAccount();
   const { transaction, getTransactionQueryKey } = useGetTransaction(BigInt(id));
-  const { isConfirmed, isConfirmedQueryKey } = useIsConfirmed(BigInt(id), address || '0x');
+  const {
+    isConfirmed,
+    isConfirmedQueryKey
+  } = useIsConfirmed(BigInt(id), address || '0x');
   const { confirmTxWriteContract } = useConfirmTx();
   const { owners } = useGetOwners();
   const { data: blockNumber } = useBlockNumber({ watch: true });
@@ -136,7 +140,7 @@ export const Transaction = ({ id }: { id: number }) => {
     }
   }, [blockNumber, queryClient]);
 
-  const convertedValue = transaction.value / BigInt(10 ** tokenDecimals);
+  const convertedValue = formatUnits(transaction.value, tokenDecimals);
 
   const handleConfirmTx = () => {
     confirmTxWriteContract({ txId: id });
