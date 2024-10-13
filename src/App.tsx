@@ -6,18 +6,20 @@ import { SelectContractView } from '@/views/select-contract.view.tsx';
 import {
   ContractTransactionsView
 } from '@/views/contract-transactions.view.tsx';
+import { ProposeTransaction } from '@/views/propose-transaction.view.tsx';
 
 function App() {
   return (
     <>
       <Section>
-        <Container>
-          <div className={'grid grid-cols-1 md:grid-cols-2 gap-8'}>
+        <Container className={'!gap-2'}>
+          <div className={'grid grid-cols-1 md:grid-cols-2 gap-2'}>
             <DeployContractView/>
             <SelectContractView/>
           </div>
-          <div className={'grid grid-cols-1 md:grid-cols-2 gap-8'}>
+          <div className={'grid grid-cols-1 md:grid-cols-2 gap-2'}>
             <ContractTransactionsView/>
+            <ProposeTransaction/>
           </div>
         </Container>
       </Section>

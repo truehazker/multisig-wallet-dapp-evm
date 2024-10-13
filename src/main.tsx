@@ -11,7 +11,7 @@ import {
 } from '@tanstack/react-query';
 import { ConnectKitProvider } from 'connectkit';
 
-const queryClient = new QueryClient();
+export const queryClient = new QueryClient();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

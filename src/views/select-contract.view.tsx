@@ -138,7 +138,7 @@ export const SelectContractView = () => {
   };
 
   return (
-    <div className="border rounded-lg p-6 max-w-3xl mx-auto">
+    <div className="w-full border rounded p-6 max-w-3xl mx-auto">
       <h2 className="text-2xl font-bold mb-4">Select a Contract</h2>
       <ScrollArea className="h-[400px]">
         <Table>

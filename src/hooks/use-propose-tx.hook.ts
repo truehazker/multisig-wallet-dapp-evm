@@ -24,7 +24,12 @@ export const useProposeTx = () => {
     }
   });
 
-  const writeContract = (tokenAddress: Address, to: Address, value: bigint, data: Hex) => {
+  const writeContract = ({ tokenAddress, to, value, data }: {
+    tokenAddress: Address;
+    to: Address;
+    value: bigint;
+    data: Hex;
+  }) => {
     if (!activeContract?.contractAddress) {
       toast.error('No active contract address');
       return;

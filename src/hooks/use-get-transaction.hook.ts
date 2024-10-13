@@ -3,7 +3,7 @@ import { contractAbi } from '@/const/contract.const.ts';
 import { Address } from 'viem';
 import { useStore } from '@/const/local-storage.const.ts';
 
-interface ITransaction {
+export interface ITransaction {
   tokenAddress: Address;
   to: Address;
   value: bigint;
@@ -16,7 +16,7 @@ export const useGetTransaction = (txId: bigint) => {
   const { activeContract } = useStore();
 
   const {
-    data: transaction = {} as ITransaction,
+    data: transaction = ['0x', '0x', BigInt(0), false, BigInt(0), '0x'],
     queryKey: getTransactionQueryKey
   } = useReadContract({
     abi: contractAbi,
@@ -25,8 +25,19 @@ export const useGetTransaction = (txId: bigint) => {
     args: [txId]
   });
 
+  // Convert the transaction data to a more readable format
+  const [tokenAddress, to, value, executed, confirmations, data] = transaction;
+  const transactionData: ITransaction = {
+    tokenAddress,
+    to,
+    value,
+    executed,
+    confirmations,
+    data
+  };
+
   return {
-    transaction,
+    transaction: transactionData,
     getTransactionQueryKey
   };
 };

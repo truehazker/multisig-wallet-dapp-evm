@@ -2,20 +2,23 @@ import { useReadContract } from 'wagmi';
 import { contractAbi } from '@/const/contract.const.ts';
 import { useStore } from '@/const/local-storage.const.ts';
 
-export const useGetTransactionCountHook = () => {
+export const useGetTransactionCount = () => {
   const { activeContract } = useStore();
 
   const {
     data: transactionCount = BigInt(0),
-    queryKey: transactionCountQueryKey
+    queryKey: transactionCountQueryKey,
+    refetch: refetchTransactionCount
   } = useReadContract({
     abi: contractAbi,
     address: activeContract?.contractAddress,
-    functionName: 'getTransactionCount'
+    functionName: 'getTransactionCount',
   });
 
   return {
     transactionCount,
-    transactionCountQueryKey
+    transactionCountNumber: Number(transactionCount),
+    transactionCountQueryKey,
+    refetchTransactionCount
   };
 };

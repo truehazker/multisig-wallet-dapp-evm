@@ -91,8 +91,7 @@ export const DeployContractView = () => {
   const hasMinimumOwners = useMemo(() => owners.length >= 2, [owners]);
 
   return (
-
-    <div className="flex flex-col gap-4 border rounded p-6">
+    <div className="w-full flex flex-col gap-4 border rounded p-6">
       <h2 className="text-xl font-bold">Deploy new MultisigWallet</h2>
       {!isConnected ? (
         <ConnectionNotice/>
