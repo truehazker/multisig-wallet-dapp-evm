@@ -10,14 +10,15 @@ interface ThresholdInputProps {
 }
 
 export const ThresholdInput: FC<ThresholdInputProps> = ({
-                                                                threshold,
-                                                                setThreshold,
-                                                                ownersCount,
-                                                                hasMinimumOwners
-                                                              }) => (
+                                                          threshold,
+                                                          setThreshold,
+                                                          ownersCount,
+                                                          hasMinimumOwners
+                                                        }) => (
   <div className="flex flex-col gap-2">
     <label htmlFor="threshold" className="text-sm font-medium">
-      Threshold: {threshold} / {ownersCount}
+      Confirmations: {threshold} <span
+      className={'text-white/50'}>/ {ownersCount}</span>
     </label>
     <Slider
       id="threshold"
