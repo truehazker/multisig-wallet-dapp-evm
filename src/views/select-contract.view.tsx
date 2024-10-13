@@ -21,6 +21,9 @@ import {
   DialogTitle
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
+import {
+  AddExistingContract
+} from '@/components/add-existing-contract.component.tsx';
 
 const shortenAddress = (address: string, digits = 4) => {
   return `${address.slice(0, digits + 2)}...${address.slice(-digits)}`;
@@ -140,6 +143,7 @@ export const SelectContractView = () => {
   return (
     <div className="w-full border rounded p-6 max-w-3xl mx-auto">
       <h2 className="text-2xl font-bold mb-4">Select a Contract</h2>
+      <AddExistingContract/>
       <ScrollArea className="h-[400px]">
         <Table>
           <TableHeader>
