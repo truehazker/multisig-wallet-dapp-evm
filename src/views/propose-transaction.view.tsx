@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button.tsx';
 import { useProposeTx } from '@/hooks/use-propose-tx.hook.ts';
 import { Address, isAddress, zeroAddress } from 'viem';
 import { useGetTokenInfo } from '@/hooks/use-get-token-info.hook.ts';
-import { Switch } from "@/components/ui/switch";
+import { Switch } from '@/components/ui/switch';
+import { parseUnits } from 'viem';
 
 export const ProposeTransaction = () => {
   const { proposalWriteContract, proposalIsPending } = useProposeTx();
@@ -63,10 +64,13 @@ export const ProposeTransaction = () => {
     if (Object.values(errors).some((error) => error !== '')) {
       return;
     }
+
+    const valueInWei = parseUnits(formData.value, tokenDecimals);
+
     proposalWriteContract({
       tokenAddress: formData.tokenAddress as Address,
       to: formData.to as Address,
-      value: BigInt(formData.value) * 10n ** BigInt(tokenDecimals),
+      value: valueInWei,
       data: '0x'
     });
     // Reset form after successful submission
@@ -77,14 +81,14 @@ export const ProposeTransaction = () => {
     <div className="w-full flex flex-col gap-4 border rounded p-6">
       <h2 className="text-xl font-bold">Propose Transaction</h2>
       <div className="flex items-center space-x-2 mb-4">
-      <Label htmlFor="send-token-switch">
-        Send ETH
+        <Label htmlFor="send-token-switch">
+          Send ETH
         </Label>
         <Switch
           id="send-token-switch"
           checked={isSendToken}
           onCheckedChange={setIsSendToken}
-          />
+        />
         <Label htmlFor="send-token-switch">
           Send Token
         </Label>
