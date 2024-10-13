@@ -1,8 +1,5 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
-import { Section } from '@/components/section.component.tsx';
-import { Container } from '@/components/container.component.tsx';
 import { useAccount } from 'wagmi';
-import { LocalStorage } from '@/const/local-storage.const.ts';
 import { Address, isAddress } from 'viem';
 import {
   useDeployMultisigWallet
@@ -14,8 +11,10 @@ import { OwnersInput } from '@/components/owners-input.component.tsx';
 import { ThresholdInput } from '@/components/threshold-input.component.tsx';
 import { DeploymentButton } from '@/components/deployment-button.component.tsx';
 import { toast } from 'sonner';
+import { useStore } from '@/const/local-storage.const';
 
 export const DeployContractView = () => {
+  const { setActiveContract, appendContractsHistory } = useStore();
   const { isConnected, address } = useAccount();
 
   const [owners, setOwners] = useState<string[]>(['']);
@@ -28,9 +27,10 @@ export const DeployContractView = () => {
     error: deploymentError
   } =
     useDeployMultisigWallet({
-      onSuccess: ({ contractAddress }) => {
-        console.log('Contract deployed:', contractAddress);
-        LocalStorage.setActiveContract(contractAddress);
+      onSuccess: (contract) => {
+        console.log('Contract deployed:', contract.contractAddress);
+        setActiveContract(contract);
+        appendContractsHistory(contract);
         toast.success('Contract deployed successfully');
       },
       onError: (error) => {
@@ -91,45 +91,40 @@ export const DeployContractView = () => {
   const hasMinimumOwners = useMemo(() => owners.length >= 2, [owners]);
 
   return (
-    <Section>
-      <Container>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex flex-col gap-4 border rounded p-6">
-            <h2 className="text-xl font-bold">Deploy new MultisigWallet</h2>
-            {!isConnected ? (
-              <ConnectionNotice/>
-            ) : (
-              <>
-                <OwnersInput
-                  owners={owners}
-                  updateOwner={updateOwner}
-                  removeOwner={removeOwner}
-                  addOwner={addOwner}
-                />
-                <ThresholdInput
-                  threshold={threshold}
-                  setThreshold={setThreshold}
-                  ownersCount={owners.length}
-                  hasMinimumOwners={hasMinimumOwners}
-                />
-                <DeploymentButton
-                  isValid={isValid}
-                  isLoading={deploymentLoading}
-                  handleDeploy={handleDeploy}
-                />
-                {!hasMinimumOwners && (
-                  <p className="text-red-500 text-sm">At least two owners are
-                    required.</p>
-                )}
-                {deploymentError && (
-                  <p className="text-red-500 text-sm">Deployment
-                    error: {deploymentError.message}</p>
-                )}
-              </>
-            )}
-          </div>
-        </div>
-      </Container>
-    </Section>
+
+    <div className="flex flex-col gap-4 border rounded p-6">
+      <h2 className="text-xl font-bold">Deploy new MultisigWallet</h2>
+      {!isConnected ? (
+        <ConnectionNotice/>
+      ) : (
+        <>
+          <OwnersInput
+            owners={owners}
+            updateOwner={updateOwner}
+            removeOwner={removeOwner}
+            addOwner={addOwner}
+          />
+          <ThresholdInput
+            threshold={threshold}
+            setThreshold={setThreshold}
+            ownersCount={owners.length}
+            hasMinimumOwners={hasMinimumOwners}
+          />
+          <DeploymentButton
+            isValid={isValid}
+            isLoading={deploymentLoading}
+            handleDeploy={handleDeploy}
+          />
+          {!hasMinimumOwners && (
+            <p className="text-red-500 text-sm">At least two owners are
+              required.</p>
+          )}
+          {deploymentError && (
+            <p className="text-red-500 text-sm">Deployment
+              error: {deploymentError.message}</p>
+          )}
+        </>
+      )}
+    </div>
   );
 };

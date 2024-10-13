@@ -1,52 +1,56 @@
-import { Store } from '@tanstack/react-store';
+import { Address } from 'viem';
+import { create } from 'zustand';
+import {
+  persist,
+  PersistStorage
+} from 'zustand/middleware';
+import superjson from 'superjson';
+
+export interface IContract {
+  contractAddress: Address;
+  owners: Address[];
+  threshold: bigint;
+}
 
 interface IStore {
-  contractsHistory: string[];    // History of deployed or attached contracts
-  activeContract: string | null; // Active contract
+  contractsHistory: IContract[];
+  activeContract: IContract | null;
+  appendContractsHistory: (contract: IContract) => void;
+  setActiveContract: (contract: IContract | null) => void;
+  setState: (newState: Partial<IStore>) => void;
 }
 
-const store = new Store<IStore>({
-  contractsHistory: [],
-  activeContract: null
-});
+const storage: PersistStorage<IStore> = {
+  getItem: (name) => {
+    const str = localStorage.getItem(name);
+    if (!str) return null;
+    return superjson.parse(str);
+  },
+  setItem: (name, value) => {
+    localStorage.setItem(name, superjson.stringify(value));
+  },
+  removeItem: (name) => localStorage.removeItem(name)
+};
 
-export class LocalStorage {
-  static getContractsHistory(): string[] {
-    return store.state.contractsHistory;
-  }
+export const useStore = create<IStore>()(
+  persist(
+    (set) => ({
+      contractsHistory: [],
+      activeContract: null,
+      appendContractsHistory: (contract) =>
+        set((state) => ({ contractsHistory: [...state.contractsHistory, contract] })),
+      setActiveContract: (contract) => set({ activeContract: contract }),
+      setState: (newState) => set(newState)
+    }),
+    {
+      name: 'app-storage',
+      storage
+    }
+  )
+);
 
-  static setContractsHistory(value: string[]) {
-    store.setState((state) => {
-      return {
-        ...state,
-        contractsHistory: value
-      };
-    });
-  }
-
-  static getActiveContract(): string | null {
-    return store.state.activeContract;
-  }
-
-  static setActiveContract(value: string | null) {
-    store.setState((state) => {
-      return {
-        ...state,
-        activeContract: value
-      };
-    });
-  }
-
-  static getState(): IStore {
-    return store.state;
-  }
-
-  static setState(value: IStore) {
-    store.setState((state) => {
-      return {
-        ...state,
-        ...value
-      };
-    });
-  }
-}
+// Functions to change storage outside of React components
+export const appendContractsHistory = (contract: IContract) => useStore.getState().appendContractsHistory(contract);
+export const setActiveContract = (contract: IContract | null) => useStore.getState().setActiveContract(contract);
+export const getState = () => useStore.getState();
+export const setState = (newState: Partial<IStore>) => useStore.getState().setState(newState);

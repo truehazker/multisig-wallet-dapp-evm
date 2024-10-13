@@ -7,7 +7,11 @@ import { useWalletClient } from 'wagmi';
 
 interface UseDeployMultisigWalletOptions {
   onError?: (error: Error) => void;
-  onSuccess?: (data: { contractAddress: Address }) => void;
+  onSuccess?: (data: {
+    contractAddress: Address,
+    owners: Address[],
+    threshold: bigint
+  }) => void;
   onSettled?: () => void;
 }
 
@@ -41,7 +45,11 @@ export const useDeployMultisigWallet = (options?: UseDeployMultisigWalletOptions
         }
 
         setContractAddress(receipt.contractAddress);
-        options?.onSuccess?.({ contractAddress: receipt.contractAddress });
+        options?.onSuccess?.({
+          contractAddress: receipt.contractAddress,
+          owners,
+          threshold,
+        });
       } catch (err) {
         setError(err as Error);
         options?.onError?.(err as Error);
