@@ -16,6 +16,7 @@ interface IStore {
   contractsHistory: IContract[];
   activeContract: IContract | null;
   appendContractsHistory: (contract: IContract) => void;
+  removeContractFromHistory: (contractAddress: Address) => void;
   setActiveContract: (contract: IContract | null) => void;
   setState: (newState: Partial<IStore>) => void;
 }
@@ -39,6 +40,16 @@ export const useStore = create<IStore>()(
       activeContract: null,
       appendContractsHistory: (contract) =>
         set((state) => ({ contractsHistory: [...state.contractsHistory, contract] })),
+      removeContractFromHistory: (contractAddress) =>
+        set((state) => ({
+          contractsHistory: state.contractsHistory.filter(
+            (c) => c.contractAddress !== contractAddress
+          ),
+          activeContract:
+            state.activeContract?.contractAddress === contractAddress
+              ? null
+              : state.activeContract,
+        })),
       setActiveContract: (contract) => set({ activeContract: contract }),
       setState: (newState) => set(newState)
     }),
@@ -51,6 +62,7 @@ export const useStore = create<IStore>()(
 
 // Functions to change storage outside of React components
 export const appendContractsHistory = (contract: IContract) => useStore.getState().appendContractsHistory(contract);
+export const removeContractFromHistory = (contractAddress: Address) => useStore.getState().removeContractFromHistory(contractAddress);
 export const setActiveContract = (contract: IContract | null) => useStore.getState().setActiveContract(contract);
 export const getState = () => useStore.getState();
 export const setState = (newState: Partial<IStore>) => useStore.getState().setState(newState);

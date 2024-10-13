@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { contractAbi, contractBytecode } from '@/const/contract.const';
+import { MULTISIG_WALLET_ABI, MULTISIG_WALLET_BYTECODE } from '@/const/contract.const';
 import { Address, Hash } from 'viem';
 import { waitForTransactionReceipt } from 'viem/actions';
 import { config } from '@/const/wagmi-config.const';
@@ -31,8 +31,8 @@ export const useDeployMultisigWallet = (options?: UseDeployMultisigWalletOptions
         if (!walletClient) throw new Error('Wallet client not found');
 
         const deploymentTxHash = await walletClient.deployContract({
-          abi: contractAbi,
-          bytecode: contractBytecode,
+          abi: MULTISIG_WALLET_ABI,
+          bytecode: MULTISIG_WALLET_BYTECODE,
           args: [owners, threshold]
         });
 

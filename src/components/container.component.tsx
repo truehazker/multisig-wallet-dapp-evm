@@ -10,7 +10,7 @@ export const Container = (props: ISectionProps) => {
 
   return (
     <div
-      className={`flex gap-8 w-full max-w-5xl flex-${direction} ${classes}`} {...rest}>
+      className={`flex gap-8 w-full max-w-7xl flex-${direction} ${classes}`} {...rest}>
       {children}
     </div>
   );

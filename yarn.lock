@@ -1517,6 +1517,31 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@radix-ui/react-switch@npm:^1.1.1":
+  version: 1.1.1
+  resolution: "@radix-ui/react-switch@npm:1.1.1"
+  dependencies:
+    "@radix-ui/primitive": "npm:1.1.0"
+    "@radix-ui/react-compose-refs": "npm:1.1.0"
+    "@radix-ui/react-context": "npm:1.1.1"
+    "@radix-ui/react-primitive": "npm:2.0.0"
+    "@radix-ui/react-use-controllable-state": "npm:1.1.0"
+    "@radix-ui/react-use-previous": "npm:1.1.0"
+    "@radix-ui/react-use-size": "npm:1.1.0"
+  peerDependencies:
+    "@types/react": "*"
+    "@types/react-dom": "*"
+    react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+    react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+    "@types/react-dom":
+      optional: true
+  checksum: 10c0/8b61aa3bf80d3a2037d67495cf5de9e1ffc0d0843edc0cde5adc1ff1a9b99b0a6b63a85951c79769ab5a44d484611d90dc85933a86d71f28028caa53d8db177b
+  languageName: node
+  linkType: hard
+
 "@radix-ui/react-use-callback-ref@npm:1.1.0":
   version: 1.1.0
   resolution: "@radix-ui/react-use-callback-ref@npm:1.1.0"
@@ -5397,6 +5422,7 @@ __metadata:
     "@radix-ui/react-scroll-area": "npm:^1.2.0"
     "@radix-ui/react-slider": "npm:^1.2.1"
     "@radix-ui/react-slot": "npm:^1.1.0"
+    "@radix-ui/react-switch": "npm:^1.1.1"
     "@tanstack/react-query": "npm:^5.59.13"
     "@types/node": "npm:^22.7.5"
     "@types/react": "npm:^18.3.10"
@@ -6095,11 +6121,11 @@ __metadata:
   linkType: hard
 
 "qr-code-styling@npm:^1.6.0-rc.1":
-  version: 1.6.1
-  resolution: "qr-code-styling@npm:1.6.1"
+  version: 1.7.0
+  resolution: "qr-code-styling@npm:1.7.0"
   dependencies:
     qrcode-generator: "npm:^1.4.3"
-  checksum: 10c0/c37c485d9d653ab74307884c4b52de0a3c418e87ffb75e563274717b8b7913cc635ac6799e215c87f386e1b89e3f6f4875646c9359776ddbb99efa340a1e98de
+  checksum: 10c0/201d0ee0464670efd61d67e095039c4f020b62740a303085302cbe9bda3dbca4bfc793a183003fa43bc4c5abb552205a154a51d149f91db901795738118d65ef
   languageName: node
   linkType: hard
 
@@ -7421,8 +7447,8 @@ __metadata:
   linkType: hard
 
 "viem@npm:2.x, viem@npm:^2.1.1":
-  version: 2.21.23
-  resolution: "viem@npm:2.21.23"
+  version: 2.21.24
+  resolution: "viem@npm:2.21.24"
   dependencies:
     "@adraffy/ens-normalize": "npm:1.11.0"
     "@noble/curves": "npm:1.6.0"
@@ -7438,7 +7464,7 @@ __metadata:
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: 10c0/d46e2de2cb8978e33a1e8019a4aa70db41f736f929551edc24c3dec9192b5c9287ce3d2c11963ebbdd1c780d5027c236d39640e421d06cb8d15cb84689ce0e15
+  checksum: 10c0/f63b36aefbe7cb87b9a154f58af03924388df0ee68067e1bfdbf78d9ded34111cf7a809c076783f7009373a1fa9daaeea7c7badcfaa85da2e2cd952c1da44c0d
   languageName: node
   linkType: hard
 
@@ -7715,11 +7741,11 @@ __metadata:
   linkType: hard
 
 "yaml@npm:^2.3.4":
-  version: 2.5.1
-  resolution: "yaml@npm:2.5.1"
+  version: 2.6.0
+  resolution: "yaml@npm:2.6.0"
   bin:
     yaml: bin.mjs
-  checksum: 10c0/40fba5682898dbeeb3319e358a968fe886509fab6f58725732a15f8dda3abac509f91e76817c708c9959a15f786f38ff863c1b88062d7c1162c5334a7d09cb4a
+  checksum: 10c0/9e74cdb91cc35512a1c41f5ce509b0e93cc1d00eff0901e4ba831ee75a71ddf0845702adcd6f4ee6c811319eb9b59653248462ab94fa021ab855543a75396ceb
   languageName: node
   linkType: hard
 
