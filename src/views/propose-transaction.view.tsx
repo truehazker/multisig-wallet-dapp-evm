@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Label } from '@/components/ui/label.tsx';
 import { Input } from '@/components/ui/input.tsx';
 import { Button } from '@/components/ui/button.tsx';
 import { useProposeTx } from '@/hooks/use-propose-tx.hook.ts';
 import { Address, isAddress, zeroAddress } from 'viem';
 import { useGetTokenInfo } from '@/hooks/use-get-token-info.hook.ts';
+import { Switch } from "@/components/ui/switch";
 
 export const ProposeTransaction = () => {
   const { proposalWriteContract, proposalIsPending } = useProposeTx();
@@ -19,6 +20,15 @@ export const ProposeTransaction = () => {
     value: ''
   });
   const { tokenDecimals } = useGetTokenInfo(formData.tokenAddress as Address);
+  const [isSendToken, setIsSendToken] = useState(false);
+
+  useEffect(() => {
+    if (!isSendToken) {
+      setFormData(prev => ({ ...prev, tokenAddress: zeroAddress }));
+    } else {
+      setFormData(prev => ({ ...prev, tokenAddress: '' }));
+    }
+  }, [isSendToken]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -66,23 +76,38 @@ export const ProposeTransaction = () => {
   return (
     <div className="w-full flex flex-col gap-4 border rounded p-6">
       <h2 className="text-xl font-bold">Propose Transaction</h2>
-      <form onSubmit={handleProposeTx} className="flex flex-col gap-4">
-        <div>
-          <Label htmlFor="tokenAddress">Token Address</Label>
-          <Input
-            id="tokenAddress"
-            type="text"
-            value={formData.tokenAddress}
-            onChange={handleInputChange}
-            aria-invalid={!!errors.tokenAddress}
-            aria-describedby="tokenAddress-error"
+      <div className="flex items-center space-x-2 mb-4">
+      <Label htmlFor="send-token-switch">
+        Send ETH
+        </Label>
+        <Switch
+          id="send-token-switch"
+          checked={isSendToken}
+          onCheckedChange={setIsSendToken}
           />
-          {errors.tokenAddress && (
-            <p id="tokenAddress-error" className="text-red-500 text-sm mt-1">
-              {errors.tokenAddress}
-            </p>
-          )}
-        </div>
+        <Label htmlFor="send-token-switch">
+          Send Token
+        </Label>
+      </div>
+      <form onSubmit={handleProposeTx} className="flex flex-col gap-4">
+        {isSendToken && (
+          <div>
+            <Label htmlFor="tokenAddress">Token Address</Label>
+            <Input
+              id="tokenAddress"
+              type="text"
+              value={formData.tokenAddress}
+              onChange={handleInputChange}
+              aria-invalid={!!errors.tokenAddress}
+              aria-describedby="tokenAddress-error"
+            />
+            {errors.tokenAddress && (
+              <p id="tokenAddress-error" className="text-red-500 text-sm mt-1">
+                {errors.tokenAddress}
+              </p>
+            )}
+          </div>
+        )}
 
         <div>
           <Label htmlFor="to">To</Label>

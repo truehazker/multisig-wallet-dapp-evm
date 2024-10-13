@@ -28,6 +28,15 @@ export const AddExistingContract = () => {
       return;
     }
 
+    const existingContract = useStore.getState().contractsHistory.find(
+      (contract) => contract.contractAddress === contractAddress
+    );
+
+    if (existingContract) {
+      toast.error('A contract with this address already exists');
+      return;
+    }
+
     const newContract: IContract = {
       contractAddress: contractAddress,
       owners: owners as Address[],

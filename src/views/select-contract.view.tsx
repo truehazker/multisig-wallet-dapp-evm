@@ -24,6 +24,7 @@ import { toast } from 'sonner';
 import {
   AddExistingContract
 } from '@/components/add-existing-contract.component.tsx';
+import { Address } from 'viem';
 
 const shortenAddress = (address: string, digits = 4) => {
   return `${address.slice(0, digits + 2)}...${address.slice(-digits)}`;
@@ -86,11 +87,12 @@ const ContractDetailsModal = ({ contract, isOpen, onClose }: {
   );
 };
 
-const ContractRow = ({ contract, isActive, onSelect, onShowDetails }: {
+const ContractRow = ({ contract, isActive, onSelect, onShowDetails, onDelete }: {
   contract: IContract,
   isActive: boolean,
   onSelect: (contract: IContract) => void,
-  onShowDetails: (contract: IContract) => void
+  onShowDetails: (contract: IContract) => void,
+  onDelete: (contractAddress: Address) => void
 }) => {
   const handleContractCopy = (e: React.MouseEvent<HTMLTableCellElement>) => {
     e.stopPropagation();
@@ -113,23 +115,34 @@ const ContractRow = ({ contract, isActive, onSelect, onShowDetails }: {
       <TableCell>{contract.owners.length}</TableCell>
       <TableCell>{contract.threshold.toString()}</TableCell>
       <TableCell>
-        <Button
-          onClick={(e) => {
-            e.stopPropagation();
-            onSelect(contract);
-          }}
-          variant={isActive ? 'secondary' : 'default'}
-          disabled={isActive}
-        >
-          {isActive ? 'Selected' : 'Select'}
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelect(contract);
+            }}
+            variant={isActive ? 'secondary' : 'default'}
+            disabled={isActive}
+          >
+            {isActive ? 'Selected' : 'Select'}
+          </Button>
+          <Button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(contract.contractAddress);
+            }}
+            variant="destructive"
+          >
+            Delete
+          </Button>
+        </div>
       </TableCell>
     </TableRow>
   );
 };
 
 export const SelectContractView = () => {
-  const { contractsHistory, activeContract } = useStore();
+  const { contractsHistory, activeContract, removeContractFromHistory } = useStore();
   const [selectedContract, setSelectedContract] = useState<IContract | null>(null);
 
   const handleSelectContract = (contract: IContract) => {
@@ -140,9 +153,14 @@ export const SelectContractView = () => {
     setSelectedContract(contract);
   };
 
+  const handleDeleteContract = (contractAddress: Address) => {
+    removeContractFromHistory(contractAddress);
+    toast.success('Contract removed from history');
+  };
+
   return (
-    <div className="w-full border rounded p-6 max-w-3xl mx-auto">
-      <h2 className="text-2xl font-bold mb-4">Select a Contract</h2>
+    <div className="flex flex-col w-full border rounded p-6 max-w-3xl mx-auto gap-4">
+      <h2 className="text-2xl font-bold">Select a Contract</h2>
       <AddExistingContract/>
       <ScrollArea className="h-[400px]">
         <Table>
@@ -151,17 +169,18 @@ export const SelectContractView = () => {
               <TableHead>Contract Address</TableHead>
               <TableHead>Owners</TableHead>
               <TableHead>Confirmations</TableHead>
-              <TableHead>Action</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {contractsHistory.map((contract) => (
+            {[...contractsHistory].reverse().map((contract) => (
               <ContractRow
                 key={contract.contractAddress}
                 contract={contract}
                 isActive={activeContract?.contractAddress === contract.contractAddress}
                 onSelect={handleSelectContract}
                 onShowDetails={handleShowDetails}
+                onDelete={handleDeleteContract}
               />
             ))}
           </TableBody>

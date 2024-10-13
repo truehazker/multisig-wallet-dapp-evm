@@ -18,7 +18,7 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog';
-import { Address } from 'viem';
+import { Address, zeroAddress } from 'viem';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Table,
@@ -29,6 +29,7 @@ import {
   TableRow
 } from '@/components/ui/table';
 import { useGetTokenInfo } from '@/hooks/use-get-token-info.hook.ts';
+import { CheckCircle2 } from 'lucide-react';
 
 const TransactionStatus = ({ executed, isConfirmed }: {
   executed: boolean,
@@ -38,13 +39,17 @@ const TransactionStatus = ({ executed, isConfirmed }: {
   const innerColor = executed ? 'bg-green-500' : isConfirmed ? 'bg-green-500' : 'bg-blue-500';
 
   return (
-    <span className="relative flex h-3 w-3 mr-2">
-      {!executed && (
-        <span
-          className={`animate-ping absolute inline-flex h-full w-full rounded-full ${outerColor} opacity-75`}></span>
+    <span className="relative flex items-center">
+      {executed ? (
+        <CheckCircle2 className="h-4 w-4 text-green-500 mr-2" />
+      ) : (
+        <span className="relative flex h-3 w-3 mr-2">
+          <span
+            className={`animate-ping absolute inline-flex h-full w-full rounded-full ${outerColor} opacity-75`}></span>
+          <span
+            className={`relative inline-flex rounded-full h-3 w-3 ${innerColor}`}></span>
+        </span>
       )}
-      <span
-        className={`relative inline-flex rounded-full h-3 w-3 ${innerColor}`}></span>
     </span>
   );
 };
@@ -69,7 +74,9 @@ const TransactionDetails = ({
       <tbody>
       <tr>
         <td className="font-semibold pr-4 py-2">Token Address:</td>
-        <td>{transaction.tokenAddress}</td>
+        <td>
+          {transaction.tokenAddress === zeroAddress ? 'ETH' : transaction.tokenAddress}
+        </td>
       </tr>
       <tr>
         <td className="font-semibold pr-4 py-2">To:</td>
@@ -98,9 +105,15 @@ const TransactionDetails = ({
       </tr>
       </tbody>
     </table>
-    <Button onClick={handleConfirmTx} disabled={isConfirmed}>
-      Confirm Transaction
-    </Button>
+    {transaction.executed ? (
+      <Button disabled className="bg-green-500 hover:bg-green-500 cursor-not-allowed">
+        Executed
+      </Button>
+    ) : (
+      <Button onClick={handleConfirmTx} disabled={isConfirmed}>
+        Confirm Transaction
+      </Button>
+    )}
   </div>
 );
 
